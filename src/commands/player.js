@@ -37,8 +37,6 @@ module.exports = {
         text: `Joueur ajouté le ${moment(player.created_at).locale('fr').format('D MMMM YYYY')}`,
       });
 
-    console.log(player.third_weapon)
-
     if (player.third_weapon !== 'none') {
       playerEmbed.addFields({
         name: 'Troisième arme',
