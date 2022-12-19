@@ -8,7 +8,7 @@ const { weapons } = require('../utils/weapons.js');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('player')
-    .setDescription("Rettournes les informations d'un joueur.")
+    .setDescription("Rettournes les informations d'un joueur")
     .addStringOption((option) =>
       option.setName('username').setDescription('Le pseudo IG du joueur').setRequired(true)
     ),

@@ -53,6 +53,11 @@ const weapons = {
   },
 };
 
+const labelToKey = (label) => {
+  return Object.keys(weapons).find((key) => weapons[key].label === label);
+};
+
 module.exports = {
   weapons,
+  labelToKey,
 };
