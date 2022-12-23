@@ -60,15 +60,15 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 client.once(Events.ClientReady, (c) => {
   client.user.setPresence({ activities: [{ name: 'New World' }] });
 
-  const whatsup = client.channels.cache.get(`1054714484939305000`);
+  // const whatsup = client.channels.cache.get(`1054714484939305000`);
 
-  setInterval(async () => {
-    if (moment().locale('fr').format('HH:mm:ss') === '16:30:00') {
-      await whatsup.send(
-        "Salut tout le monde ! Quoi de neuf de prévu sur le jeu aujourd'hui ? *(c'est pas parce que je suis un bot que ça t'empêche de répondre hein :wink:)* @everyone"
-      );
-    }
-  }, 1000);
+  // setInterval(async () => {
+  //   if (moment().locale('fr').format('HH:mm:ss') === '16:30:00') {
+  //     await whatsup.send(
+  //       "Salut tout le monde ! Quoi de neuf de prévu sur le jeu aujourd'hui ? *(c'est pas parce que je suis un bot que ça t'empêche de répondre hein :wink:)* @everyone"
+  //     );
+  //   }
+  // }, 1000);
 
   console.log(`Ready! Logged in as ${c.user.tag}`);
 });
