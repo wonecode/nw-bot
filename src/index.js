@@ -90,7 +90,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const response = interaction.fields.getTextInputValue('balanceInput');
       const { error } = await supabase
         .from('balance')
-        .update({ count: response, updated_at: moment().locale('fr').format('YYYY-MM-DD HH:mm:ss') })
+        .update({ count: response, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') })
         .eq('id', 1);
 
       const successEmbed = new EmbedBuilder()
