@@ -91,6 +91,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const response = Number(interaction.fields.getTextInputValue('balanceInput'));
       const updatedDate = moment().utc().format();
 
+      console.log(response)
+
       const { error } = await supabase
         .from('balance')
         .update({ count: response, updated_at: updatedDate })
@@ -114,7 +116,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
 
       const channel = client.channels.cache.get(`1054848145877643325`);
-      const message = await channel.messages.fetch(`1055791622589259888`);
+      const message = await channel.messages.fetch(`1055843687390793758`);
 
       const { data: lastTransactionData } = await supabase
         .from('balance_history')
