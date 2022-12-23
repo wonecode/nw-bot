@@ -17,6 +17,7 @@ const {
 } = require('discord.js');
 const { supabase } = require('../supabase');
 const moment = require('moment');
+const { embed } = require('./commands/balance');
 
 dotenv.config();
 
@@ -87,10 +88,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   if (interaction.type === InteractionType.ModalSubmit) {
     if (interaction.customId === 'updateBalanceModal') {
-      const response = interaction.fields.getTextInputValue('balanceInput');
+      const response = Number(interaction.fields.getTextInputValue('balanceInput'));
+      const updatedDate = moment().utc().format();
+
       const { error } = await supabase
         .from('balance')
-        .update({ count: response, updated_at: moment().utc().format() })
+        .update({ count: response, updated_at: updatedDate })
         .eq('id', 1);
 
       const successEmbed = new EmbedBuilder()
@@ -109,6 +112,25 @@ client.on(Events.InteractionCreate, async (interaction) => {
           ephemeral: true,
         });
       }
+
+      const channel = client.channels.cache.get(`1054848145877643325`);
+      const message = await channel.messages.fetch(`1055791622589259888`);
+
+      const { data: lastTransactionData } = await supabase
+        .from('balance_history')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      message.edit({
+        embeds: [
+          embed({
+            balance: response,
+            last_transaction: lastTransactionData[0],
+            updated_date: updatedDate,
+          }).toJSON(),
+        ],
+      });
 
       await interaction.reply({
         embeds: [

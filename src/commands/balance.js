@@ -3,7 +3,7 @@ const { supabase } = require('../../supabase');
 const { EmbedBuilder } = require('discord.js');
 const moment = require('moment');
 
-const embed = ({ balance, last_transaction }) =>
+const embed = ({ balance, last_transaction, updated_date }) =>
   new EmbedBuilder()
     .setAuthor({
       name: 'Trésorerie O&L',
@@ -14,7 +14,7 @@ const embed = ({ balance, last_transaction }) =>
     .addFields(
       {
         name: 'Solde',
-        value: `\`\`\`💰 ${balance.count.toLocaleString(undefined, {
+        value: `\`\`\`💰 ${balance.toLocaleString(undefined, {
           minimumFractionDigits: 2,
         })}\`\`\``,
         inline: true,
@@ -26,7 +26,7 @@ const embed = ({ balance, last_transaction }) =>
       }
     )
     .setFooter({
-      text: `Dernière mise à jour du solde ${moment(balance.updated_at).locale('fr').from(moment())}`,
+      text: `Dernière mise à jour du solde le ${moment(updated_date).locale('fr').format('DD MMMM YYYY à HH:mm')}`,
     });
 
 const actionButtons = new ActionRowBuilder().addComponents(
@@ -42,6 +42,7 @@ const actionButtons = new ActionRowBuilder().addComponents(
 );
 
 module.exports = {
+  embed,
   data: new SlashCommandBuilder()
     .setName('balance')
     .setDescription('Afficher le solde de la trésorerie de la guilde'),
@@ -59,7 +60,7 @@ module.exports = {
     }
 
     await interaction.reply({
-      embeds: [embed({ balance: balanceData[0], last_transaction: lastTransactionData[0] })],
+      embeds: [embed({ balance: balanceData[0].count, last_transaction: lastTransactionData[0], updated_date: balanceData[0].updated_at })],
       components: [actionButtons],
     });
   },
