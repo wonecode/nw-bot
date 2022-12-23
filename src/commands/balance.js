@@ -26,7 +26,7 @@ const embed = ({ balance, last_transaction }) =>
       }
     )
     .setFooter({
-      text: `Dernière mise à jour du solde le ${moment(balance.updated_at).locale('fr').format('DD/MM/YYYY à HH:mm')}`,
+      text: `Dernière mise à jour du solde ${moment(balance.updated_at).locale('fr').from(moment())}`,
     });
 
 const actionButtons = new ActionRowBuilder().addComponents(
