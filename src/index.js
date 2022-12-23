@@ -1,7 +1,22 @@
 const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
-const { Client, Events, GatewayIntentBits, Collection, REST, Routes } = require('discord.js');
+const {
+  Client,
+  Events,
+  GatewayIntentBits,
+  Collection,
+  REST,
+  Routes,
+  ModalBuilder,
+  ActionRowBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  InteractionType,
+  EmbedBuilder,
+} = require('discord.js');
+const { supabase } = require('../supabase');
+const moment = require('moment');
 
 dotenv.config();
 
@@ -48,6 +63,70 @@ client.once(Events.ClientReady, (c) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  if (interaction.isButton()) {
+    if (interaction.customId === 'updateBalance') {
+      const modal = new ModalBuilder()
+        .setCustomId('updateBalanceModal')
+        .setTitle('Mettre à jour le solde de la trésorerie')
+        .addComponents([
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('balanceInput')
+              .setLabel('Nouveau solde')
+              .setStyle(TextInputStyle.Short)
+              .setMinLength(3)
+              .setMaxLength(9)
+              .setPlaceholder('43627.27')
+              .setRequired(true)
+          ),
+        ]);
+
+      await interaction.showModal(modal);
+    }
+  }
+
+  if (interaction.type === InteractionType.ModalSubmit) {
+    if (interaction.customId === 'updateBalanceModal') {
+      const response = interaction.fields.getTextInputValue('balanceInput');
+      const { error } = await supabase
+        .from('balance')
+        .update({ count: response, updated_at: moment().locale('fr').format('YYYY-MM-DD HH:mm:ss') })
+        .eq('id', 1);
+
+      const successEmbed = new EmbedBuilder()
+        .setTitle('Mise à jour du solde')
+        .setColor('#2ecc71')
+        .setFooter({
+          text: interaction.user.username,
+          iconURL: interaction.user.avatarURL({ dynamic: true }),
+        })
+        .setTimestamp();
+
+      if (error) {
+        console.log(error);
+        await interaction.reply({
+          content: 'Une erreur est survenue lors de la mise à jour du solde.',
+          ephemeral: true,
+        });
+      }
+
+      await interaction.reply({
+        embeds: [
+          successEmbed
+            .setDescription(
+              `Le solde a bien été mis à jour à **${response.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}**`
+            )
+            .toJSON(),
+        ],
+        ephemeral: true,
+      });
+    }
+  }
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
   const command = interaction.client.commands.get(interaction.commandName);
@@ -62,7 +141,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   } catch (error) {
     console.error(error);
     await interaction.reply({
-      content: 'Une erreur est survenue lors de l\'exécution de cette commande.',
+      content: "Une erreur est survenue lors de l'exécution de cette commande.",
       ephemeral: true,
     });
   }
