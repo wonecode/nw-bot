@@ -94,14 +94,42 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       await interaction.showModal(modal);
     }
+
+    if (interaction.customId === 'addTransaction') {
+      const modal = new ModalBuilder()
+        .setCustomId('addTransactionModal')
+        .setTitle('Ajouter une transaction')
+        .addComponents([
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('transactionAmountInput')
+              .setLabel('Montant')
+              .setStyle(TextInputStyle.Short)
+              .setMinLength(3)
+              .setMaxLength(9)
+              .setPlaceholder('43627.27')
+              .setRequired(true)
+          ),
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('transactionReasonInput')
+              .setLabel('Raison')
+              .setStyle(TextInputStyle.Short)
+              .setMinLength(3)
+              .setMaxLength(100)
+              .setPlaceholder('Fonderie T5')
+              .setRequired(true)
+          ),
+        ]);
+
+      await interaction.showModal(modal);
+    }
   }
 
   if (interaction.type === InteractionType.ModalSubmit) {
     if (interaction.customId === 'updateBalanceModal') {
       const response = Number(interaction.fields.getTextInputValue('balanceInput'));
       const updatedDate = moment().utc().format();
-
-      console.log(response);
 
       const { error } = await supabase
         .from('balance')
@@ -126,7 +154,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
 
       const channel = client.channels.cache.get(`1054848145877643325`);
-      const message = await channel.messages.fetch(`1055843687390793758`);
+      const message = await channel.messages.fetch(`1057239705248333855`);
 
       const { data: lastTransactionData } = await supabase
         .from('balance_history')
@@ -151,6 +179,123 @@ client.on(Events.InteractionCreate, async (interaction) => {
               `Le solde a bien été mis à jour à **${response.toLocaleString(undefined, {
                 minimumFractionDigits: 2,
               })}**`
+            )
+            .toJSON(),
+        ],
+        ephemeral: true,
+      });
+    }
+
+    if (interaction.customId === 'addTransactionModal') {
+      const responseAmount = interaction.fields.getTextInputValue('transactionAmountInput');
+      const responseReason = interaction.fields.getTextInputValue('transactionReasonInput');
+      const updatedDate = moment().utc().format();
+
+      const { data: previousBalanceData } = await supabase.from('balance').select('*');
+
+      const { error: errorBalance } = await supabase
+        .from('balance')
+        .update([
+          { count: previousBalanceData[0].count - Number(responseAmount), updated_at: updatedDate },
+        ])
+        .eq('id', 1);
+
+      if (errorBalance) {
+        console.log(errorBalance);
+        await interaction.reply({
+          content: "Une erreur est survenue lors de l'ajout de la transaction.",
+          ephemeral: true,
+        });
+      }
+
+      const { error: errorTransaction } = await supabase.from('balance_history').insert([
+        {
+          amount: Number(responseAmount),
+          reason: responseReason,
+          user: interaction.user.tag,
+        },
+      ]);
+
+      if (errorTransaction) {
+        console.log(errorTransaction);
+        await interaction.reply({
+          content: "Une erreur est survenue lors de l'ajout de la transaction.",
+          ephemeral: true,
+        });
+      }
+
+      const successEmbed = new EmbedBuilder()
+        .setTitle("Ajout d'une transaction")
+        .setColor('#2ecc71')
+        .setFooter({
+          text: interaction.user.username,
+          iconURL: interaction.user.avatarURL({ dynamic: true }),
+        })
+        .setTimestamp();
+
+      const balanceChannel = client.channels.cache.get(`1054848145877643325`);
+      const balanceMessage = await balanceChannel.messages.fetch(`1057239705248333855`);
+
+      const { data: balanceData } = await supabase.from('balance').select('*').eq('id', 1);
+      const { data: lastTransactionData } = await supabase
+        .from('balance_history')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      balanceMessage.edit({
+        embeds: [
+          embed({
+            balance: balanceData[0].count,
+            last_transaction: lastTransactionData[0],
+            updated_date: updatedDate,
+          }).toJSON(),
+        ],
+      });
+
+      const historyChannel = client.channels.cache.get(`1055868265131430039`);
+
+      historyChannel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle('Nouvelle transaction ajoutée')
+            .setAuthor({
+              name: 'Trésorerie O&L',
+              iconURL:
+                'https://www.iconbunny.com/icons/media/catalog/product/9/4/948.9-local-banks-icon-iconbunny.jpg',
+            })
+            .setColor('#9b59b6')
+            .addFields({
+              name: 'Montant',
+              value: `\`\`\`💶 ${responseAmount.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}\`\`\``,
+              inline: true,
+            })
+            .addFields({
+              name: 'Raison',
+              value: `\`\`\`🧾 ${responseReason}\`\`\``,
+              inline: true,
+            })
+            .addFields({
+              name: 'Nouveau solde',
+              value: `\`\`\`💰 ${balanceData[0].count.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}\`\`\``,
+            })
+            .setFooter({
+              text: interaction.user.tag,
+              iconURL: interaction.user.avatarURL({ dynamic: true }),
+            })
+            .setTimestamp(),
+        ],
+      });
+
+      await interaction.reply({
+        embeds: [
+          successEmbed
+            .setDescription(
+              `La transaction a bien été ajoutée : **${responseAmount}** pour **${responseReason}**`
             )
             .toJSON(),
         ],

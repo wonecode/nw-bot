@@ -17,12 +17,10 @@ const embed = ({ balance, last_transaction, updated_date }) =>
         value: `\`\`\`💰 ${balance.toLocaleString(undefined, {
           minimumFractionDigits: 2,
         })}\`\`\``,
-        inline: true,
       },
       {
         name: 'Dernière transaction',
         value: `\`\`\`🧾 ${last_transaction.amount} pour ${last_transaction.reason} par ${last_transaction.user}\`\`\``,
-        inline: true,
       }
     )
     .setFooter({
@@ -38,7 +36,6 @@ const actionButtons = new ActionRowBuilder().addComponents(
     .setCustomId('addTransaction')
     .setLabel('Ajouter une transaction')
     .setStyle(ButtonStyle.Success)
-    .setDisabled(true)
 );
 
 module.exports = {
