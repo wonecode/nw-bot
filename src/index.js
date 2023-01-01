@@ -14,10 +14,12 @@ const {
   TextInputStyle,
   InteractionType,
   EmbedBuilder,
+  ActivityType,
 } = require('discord.js');
 const { supabase } = require('../supabase');
 const moment = require('moment');
 const { embed } = require('./commands/balance');
+const { default: axios } = require('axios');
 
 dotenv.config();
 
@@ -58,7 +60,32 @@ const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 })();
 
 client.once(Events.ClientReady, (c) => {
-  client.user.setPresence({ activities: [{ name: 'New World' }] });
+  setInterval(async () => {
+    axios
+      .get('https://nwdb.info/server-status/servers_24h.json', {
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'PostmanRuntime/7.29.2',
+          Accept: '*/*',
+          'Accept-Encoding': 'gzip, deflate, br',
+          Connection: 'keep-alive',
+        },
+      })
+      .then((response) => {
+        const data = response.data;
+        const servers = data.data.servers;
+        servers.forEach((server) => {
+          if (server.includes('Gilgamesh')) {
+            client.user.setPresence({
+              activities: [{ name: `${server[1]} joueurs`, type: ActivityType.Watching }],
+            });
+          }
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, 60000);
 
   // const whatsup = client.channels.cache.get(`1054714484939305000`);
 
