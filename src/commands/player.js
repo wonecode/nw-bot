@@ -27,7 +27,7 @@ module.exports = {
         iconURL: factions[player.faction].icon,
         url: 'https://nw-wartool.vercel.app/',
       })
-      .setDescription(`*${factions[player.faction].name} - ${player.guild}*`)
+      .setDescription(`${player.guild}`)
       .addFields(
         { name: 'Gearscore', value: player.gearscore.toString() },
         { name: 'Première arme', value: weapons[player.first_weapon].label, inline: true },

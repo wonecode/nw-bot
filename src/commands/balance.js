@@ -14,7 +14,7 @@ const embed = ({ balance, last_transaction, updated_date }) =>
     .addFields(
       {
         name: 'Solde',
-        value: `\`\`\`💰 ${balance.toLocaleString(undefined, {
+        value: `\`\`\`💰 ${balance.toLocaleString('FR-fr', {
           minimumFractionDigits: 2,
         })}\`\`\``,
       },
@@ -24,7 +24,7 @@ const embed = ({ balance, last_transaction, updated_date }) =>
       }
     )
     .setFooter({
-      text: `Dernière mise à jour du solde le ${moment(updated_date).locale('fr').format('DD MMMM YYYY à HH:mm')}`,
+      text: `Dernière mise à jour du solde le ${moment(updated_date).locale('fr').format('D MMMM YYYY à HH:mm')}`,
     });
 
 const actionButtons = new ActionRowBuilder().addComponents(

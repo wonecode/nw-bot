@@ -6,7 +6,7 @@ const factions = {
   },
   marauders: {
     name: 'Les Maraudeurs',
-    icon: 'https://static.wikia.nocookie.net/new-world2651/images/3/3d/Marauders.png',
+    icon: 'https://static.wikia.nocookie.net/new-world2651/images/e/ea/Marauders.png',
     color: '#27ae60',
   },
   covenant: {

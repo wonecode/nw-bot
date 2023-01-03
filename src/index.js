@@ -294,7 +294,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .setColor('#9b59b6')
             .addFields({
               name: 'Montant',
-              value: `\`\`\`💶 ${responseAmount.toLocaleString(undefined, {
+              value: `\`\`\`💶 ${responseAmount.toLocaleString('fr', {
                 minimumFractionDigits: 2,
               })}\`\`\``,
               inline: true,
@@ -306,7 +306,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             })
             .addFields({
               name: 'Nouveau solde',
-              value: `\`\`\`💰 ${balanceData[0].count.toLocaleString(undefined, {
+              value: `\`\`\`💰 ${balanceData[0].count.toLocaleString('fr', {
                 minimumFractionDigits: 2,
               })}\`\`\``,
             })
